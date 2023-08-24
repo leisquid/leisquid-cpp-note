@@ -863,7 +863,7 @@ case '-': {
 }
 ```
 
-请看 CCPP 3rd 给出的完整的示例代码：
+请看 CPPP 3rd 给出的完整的示例代码：
 
 ```c++
 #include <iostream>
@@ -1047,3 +1047,213 @@ int main( int argc, char *argv[] ) {
     // ...
 }
 ```
+
+## 日期：23.8.24
+
+### 23. 指向函数的指针
+
+#### (1) 怎么声明
+
+如对于以下函数：
+
+```c++
+#include <string>
+
+int lexicoCompare( const string &s1, const string &s2 ) {
+    return s1.compare(s2);
+}
+```
+
+写成这样就成了函数指针。注意解引用操作符应与函数名关联，所以要用到括号：
+
+```c++
+int (*pf)( const string &, const string & );
+```
+
+用法可以是下面这样：
+
+```c++
+int printf( const char*, ... );
+int strlen( const char* );
+int (*pfce)( const char*, ... );    // 可以指向 printf()
+int (*pfc)( const char* );          // 可以指向 strlen()
+```
+
+#### (2) 初始化和赋值
+
+当一个函数名没有被调用操作符修饰时，它会被解释成指向该类型函数的指针。如：
+
+```
+lexicoCompare
+```
+
+被解释为这种指针：
+
+```c++
+int (*)( const string &, const string & );
+```
+
+指向函数的指针可以这样被初始化：
+
+```c++
+int (*pfi)( const string &, const string & ) = lexicoCompare;
+int (*pfi2)( const string &, const string & ) = &lexicoCompare;
+```
+
+也可按照以下方式被赋值：
+
+```c++
+pfi = lexicoCompare;
+pfi2 = pfi;
+```
+
+#### (3) 调用
+
+调用函数时，不需要解引用操作符。无论是用函数名直接调用函数，还是用指针间接调用函数，两者的写法是一样的。
+
+对于如下声明：
+
+```c++
+int min( int*, int );
+int (*pf)( int*, int ) = min;
+```
+
+当调用 `pf()` 时，可以写成 `pf( ia, iaSize );` 或显式地写成：`(*pf)( ia, iaSize );`。两者的效果是一致的，但是后者可以清楚楚该调用是通过函数指针执行的。
+
+只有已经被初始化或赋值的指针（引用到一个函数）才可以被安全地用来调用一个函数。
+
+#### (4) 函数指针的数组
+
+可以声明一个函数指针的数组，如：
+
+```c++
+int (*testCases[10])();
+```
+
+将 `testCases` 声明为一个拥有 10 个元素的数组，每个元素都是一个指向函数的函数指针。该函数没有参数，返回类型为 int。
+
+
+像数组 `testCases` 这样的声明非常难读，因为很难分析出函数类型与声明的哪部分相关。在这种情况下，可以使用 `typedef` 名字可以使声明更为易读：
+
+
+```c++
+typedef int (*PFV)(); // 定义函数类型指针的 typedef
+PFV testCases[10];
+```
+
+这种声明与前面的等价。
+
+由 `testCases` 的一个元素引用的函数调用如下：
+
+```c++
+const int size = 10;
+PFV testCases[size];
+int testResults[size];
+
+void runtests() {
+    for ( int i = 0; i < size; ++i )
+        // 调用一个数组元素
+        testResults[ i ] = testCases[ i ]();
+}
+```
+
+函数指针的数组可以用一个初始化列表来初始化，该表中每个初始值都代表了一个与数组元素类型相同的函数。如：
+
+```c++
+int lexicoCompare( const string &, const string & );
+int sizeCompare( const string &, const string & );
+
+typedef int ( *PFI2S )( const string &, const string & );
+PFI2S compareFuncs[2] =
+{
+    lexicoCompare,
+    sizeCompare
+};
+```
+
+也可以声明指向 `compareFuncs` 的指针。这种指针的类型是：指向函数指针数组的指针。声明如下：
+
+```c++
+PFI2S (*pfCompare)[2] = &compareFuncs;
+```
+
+声明可以分解为：
+
+```
+(*p fCompare)
+```
+
+解引用操作符 `*` 把 `pfCompare` 声明为指针，后面的 `[2]` 表示 `pfCompare` 是指向两个元素数组的指针：
+
+```
+(*pfCompare)[2]
+```
+
+`typedef PFI2S` 表示数组元素的类型：它是指向函数的指针，返回 int，有两个 `const string&` 型的参数。数组元素的类型与表达式 `&lexicoCompare` 的类型相同，也与 `compareFuncs` 的第一个元素的类型相同。此外它还可以通过下列语句之一获得：
+
+```c++
+compareFuncs[ 0 ];
+(*pfCompare)[ 0 ];
+
+```
+
+要通过 `pfCompare` 调用 `lexicoCompare` ，可以用下列语句之一：
+
+```c++
+// 两个等价的调用
+pfCompare[ 0 ]( string1, string2 );         // 编写
+((*pfCompare)[ 0 ])( string1, string2 );    // 显式
+```
+
+#### (5) 用法举例
+
+```c++
+#include <iostream>
+#include <string>
+
+// 这些通常应该在头文件中
+int lexicoCompare( const string &, const string & );
+int sizeCompare( const string &, const string & );
+typedef int (*PFI)( const string &, const string & );
+void sort( string *, string *, PFI=lexicoCompare );
+
+string as[10] = { "a", "light", "drizzle", "was", "falling",
+        "when", "they", "left", "the", "museum" };
+
+int main() {
+    // 调用 sort(), 使用缺省实参作比较操作
+    sort( as, as + sizeof(as)/sizeof(as[0]) - 1 );
+
+    // 显示排序之后的数组的结果
+    for ( int i = 0; i < sizeof(as)/sizeof(as[0]); ++i )
+        cout << as[ i ].c_str() << "\n\t";
+}
+```
+
+### 24. 关于头文件的设计
+
+(1) 头文件不能过大，否则编译时间会太长。所以有些 C++ 实现提供了预编译头文件支持。
+
+(2) 头文件不应该含有“非内联函数或对象”的定义。例如，下面的代码表示的正是这样的定义，因此不应该出现在头文件中。这些定义如果被包含在同一程序的两个或多个文件中，就会产生重复定义的编译错误：
+
+```c++
+extern int ival = 10;   // 显式初始化使得它实际上是个定义
+double fica_rate;       // 缺少 extern 而被视为 C++ 中实际的定义
+extern void dummy() {}  // 花括号代表该函数的定义
+```
+
+但是，符号常量（const）定义以及内联函数可以被定义多次。
+
+### 25. 寄存器自动对象
+
+在函数中频繁被使用的自动变量可以用 `register` 声明。如果可以，编译器会把该对象装载到机器的寄存器中，否则对象仍位于内存中。
+
+关键字 `register` 对编译器来说只是一个建议。有些编译器可能忽略该建议，而是使用寄存器分配算法找出最合适的候选放到机器可用的寄存器中。
+
+### 26. 静态局部对象
+
+是在整个程序运行期间一直存在的局部对象。一般把局部对象声明为 `static`。它的值在函数调用之间保持有效，但是其名字的可视性仍限制在其局部域内。
+
+静态局部对象在程序执行到该对象的声明处时才会被首次初始化，但是只用初始化一次，在局部域内发生调用时这个值也始终有效。
+
+未经初始化的静态局部对象会被程序自动初始化为 0。相反，自动对象的值会是任意的，除非它被显式初始化。
