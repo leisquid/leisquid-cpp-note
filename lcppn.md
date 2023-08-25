@@ -1257,3 +1257,23 @@ extern void dummy() {}  // 花括号代表该函数的定义
 静态局部对象在程序执行到该对象的声明处时才会被首次初始化，但是只用初始化一次，在局部域内发生调用时这个值也始终有效。
 
 未经初始化的静态局部对象会被程序自动初始化为 0。相反，自动对象的值会是任意的，除非它被显式初始化。
+
+## 日期：23.8.25
+
+### 今日问题
+
+> 下面是 C++ 类 classType 的成员函数 assign()：
+>
+> ```c++
+> classType& classType::assign( const classType &source )
+> {
+>     if ( this != &source )
+>     {
+>         this->~classType();
+>         new (this) classType( source );
+>     }
+>     return *this;
+> }
+> ```
+>
+> 你对这种编码风格有什么看法？你认为这是一种安全的操作吗？为什么？
