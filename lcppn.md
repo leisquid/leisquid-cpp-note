@@ -1258,22 +1258,61 @@ extern void dummy() {}  // 花括号代表该函数的定义
 
 未经初始化的静态局部对象会被程序自动初始化为 0。相反，自动对象的值会是任意的，除非它被显式初始化。
 
-## 日期：23.8.25
+## 日期：23.8.28
 
-### 今日问题
+### 27. 成员初始化表
 
-> 下面是 C++ 类 classType 的成员函数 assign()：
->
-> ```c++
-> classType& classType::assign( const classType &source )
-> {
->     if ( this != &source )
->     {
->         this->~classType();
->         new (this) classType( source );
->     }
->     return *this;
-> }
-> ```
->
-> 你对这种编码风格有什么看法？你认为这是一种安全的操作吗？为什么？
+通过成员初始化表，类数据成员可以被显式初始化。成员初始化表是由逗号分隔的成员、名字实参对。如：
+
+```c++
+inline Account::Account(const char* name, double balance)
+                : _name(name), _balance(balance) {
+    _acct_nmbr = get_unique_acct_nmbr();
+}
+```
+
+### 28. 按成员初始化
+
+做到这一点可以靠设计一个拷贝构造函数。如：
+
+```c++
+inline ZhiyuMoke::ZhiyuMoke(const ZhiyuMoke &moke) {
+    this->_name = moke._name;
+    this->_gender = moke._gender;
+    this->_iq = moke._iq;
+    this->_height = moke._height;
+}
+```
+
+“用一个类对象初始化该类另一个对象”可能会出现在以下几种情况：
+
+1. 用一个类对象显式地初始化另一个类对象，如：
+
+```c++
+ZhiyuMoke newMoke(oldMoke);
+```
+
+2. 传实参或者返回对象，如：
+
+```c++
+extern bool is_tall(ZhiyuMoke moke);
+if ( ! is_tall(moke) ) {
+    // ......
+}
+```
+
+3. 定义非空顺序容器类型，如：
+
+```c++
+vector<ZhiyuMoke> mokes(1210);
+```
+
+在本例中，用 ZhiyuMoke 缺省构造函数创建一个临时对象，然后通过 ZhiyuMoke 的拷贝构造函数，临时对象被依次拷贝到 vector 的 1,210 个元素中。
+
+4. 把一个类对象插入到一个容器类型中，如
+
+```c++
+mokes.push_back( ZhiyuMoke("Is he taller than before?") );
+```
+
+
