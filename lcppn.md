@@ -1373,7 +1373,7 @@ Queue<string> qs;
 
 基类（父类）中可以被派生类（子类）继承的成员有：所有访问权限为 public 和 protected 的成员变量和函数。protected 变量和函数只能被自己和派生类访问。但是，从基类实例化的对象中的 protected 成员是不能被派生类直接访问的。
 
-可以被派生类重写（override）的函数为虚拟函数，其声明或定义前有关键字 `virtual`。其中，被定义为 `virtual returnedType function() = 0;` 的函数为**纯虚拟函数（pure virtual function）**，可以理解为在 Java 的接口中定义的方法。这种函数所在的类称为**抽象类**，其不能被实例化，而且这个类的派生类必须实现（重写）基类中的纯虚拟函数才能被实例化。
+可以被派生类重写（override）的函数为虚拟函数，其声明或定义前有关键字 `virtual`。其中，被定义为 `virtual returnedType function(arguments ...) = 0;` 的函数为**纯虚拟函数（pure virtual function）**，可以理解为在 Java 的接口中定义的方法。这种函数所在的类称为**抽象类**，其不能被实例化，而且这个类的派生类必须实现（重写）基类中的纯虚拟函数才能被实例化。
 
 如果类中**至少有一个函数被声明为纯虚函数**，则这个类就是抽象类。
 
