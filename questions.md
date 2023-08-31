@@ -149,7 +149,7 @@ protected:
     // ...
 };
 class MI: public Derived, public Base2 {
-    public:
+public:
     // ...
 protected:
     int *ival;
