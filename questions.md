@@ -113,107 +113,146 @@ class iostream: private istream, private ostream { /* ... */ };
 
 ---
 
-## 练习 18.2
+## 练习 18.9
 
-已知下列类层次结构，它们都定义了默认的构造函数：
+已知下列类层次结构，以及数据成员集：
 
 ```c++
-class A { ... };
-class B: public A { ... };
-class C: public B { ... };
-class X { ... };
-class Y { ... };
-class Z: public X, public Y { ... };
-class MI: public C, public Z { ... };
+class Base1 {
+public:
+    // ...
+protected:
+    int ival;
+    double dval;
+    char cval;
+    // ...
+private:
+    int *id;
+    // ...
+};
+class Base2 {
+public:
+    // ...
+protected:
+    float fval;
+    // ...
+private:
+    double dval;
+    // ...
+};
+class Derived: public Base1 {
+public:
+    // ...
+protected:
+    string sval;
+    double dval;
+    // ...
+};
+class MI: public Derived, public Base2 {
+    public:
+    // ...
+protected:
+    int *ival;
+    complex<double> cval;
+    // ...
+};
 ```
 
-定义的构造函数：`MI mi;` 的执行顺序是什么？
+以及 `MI::foo()` 成员函数的骨架：
+
+```c++
+int ival;
+double dval;
+void MI::foo( double dval ) {
+    int id;
+    //...
+}
+```
+
+(a) 请指出在 `MI` 中可见的成员有哪些，有来自多个基类中的可见成员吗？
+(b) 请指出在 `MI::foo()` 中可见的成员有哪些？
 
 ---
 
-## 练习 18.3
+## 练习 18.10
 
-已知下列类层次结构，它们都定义了默认的构造函数：
+请用在练习 18.9 中定义的类层次结构，指出成员函数 `MI::bar()` 中的赋值哪些是错误的。
 
 ```c++
-class X { ... };
-class A { ... };
-class B : public A { ... };
-class C : private B { ... };
-class D : public X, public C { ... };
-D *pd = new D;
+void MI::bar() {
+    int sval;
+    // 练习答案放在此处
+}
+
 ```
 
-下列哪些转换是不允许的？
+(a): `dval = 3.14159;`
 
-(a): `X *px = pd;`
+(b): `cval = 'a';`
 
-(b): `A *pa = pd;`
+(c): `id = 1;`
 
-(c): `B *pb = pd;`
+(d): `fval = 0;`
 
-(d): `C *pc = pd;`
+(e): `sval = *ival;`
 
 ---
 
-## 练习 18.4
+## 练习 18.11
 
-已知下列类层次结构，以及虚拟函数集：
+请用在练习 18.9 中定义的类层次结构，以及下面成员函数 `MI::foobar()` 的骨架：
+
+```c++
+int id;
+void MI::foobar( float cval ) {
+    int dval;
+    // 练习答案放在此处
+}
+
+```
+
+(a) 将 `Base1` 的 `dval` 成员加上 `Derived` 的 `dval` 成员，并将结果赋值给局部的 `dval` 实例。
+
+(b) 将 `MI` 的 `cval` 的实数部分赋值给 `Base2` 的 `fval` 成员。
+
+(c) 将 `Base1` 的 `cval` 成员赋值给 `Derived` 的 `sval` 成员的第一个字符。
+
+---
+
+## 练习 18.12
+
+已知下列类层次结构，以及下列名为 `print()` 的成员函数：
 
 ```c++
 class Base {
 public:
-    virtual ~Base();
-    virtual ostream&print();
-    virtual void log();
-    virtual void debug();
-    virtual void readOn();
-    virtual void writeOn();
+    void print( string ) const;
     // ...
 };
-class Derived1 : virtual public Base {
+class Derived1: public Base {
 public:
-    virtual ~Derived1();
-    virtual void writeOn();
+    void print( int ) const;
     // ...
 };
-class Derived2 : virtual public Base {
+class Derived2: public Base {
 public:
-    virtual ~Derived2();
-    virtual void readOn();
+    void print( double ) const;
     // ...
 };
-class MI : public Derived1, public Derived2 {
+class MI: public Derived1, public Derived2 {
 public:
-    virtual ~MI();
-    virtual ostream&print();
-    virtual void debug();
+    void print( complex<double> )const;
     // ...
 };
 
-Base *pb = new MI;
 ```
 
-下列语句调用哪一个函数实例？
+1. 为什么下列语句会导致编译时刻错误？
 
-(a): `pb->print();`
+```c++
+MI mi;
+string dancer( "Nijinsky" );
+mi.print( dancer );
+```
 
-(b): `pb->debug();`
-
-(c): `pb->readOn();`
-
-(d): `pb->writeOn();`
-
-(e): `pb->log();`
-
-(f): `delete pb;`
-
----
-
-## 练习 18.5
-
-使用练习 18.4 定义的类层次结构，请指出当通过 (a) pd1 和 (b) d2 调用时，哪些虚拟函数是活动的：
-
-(a): `Derived1 *pd1 = new MI;`
-
-(b): `MI obj; Derived2 d2 = obj;`
+2. 怎样修改 `MI` 的定义以使它正确编译和执行？
