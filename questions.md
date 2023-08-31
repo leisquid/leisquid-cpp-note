@@ -61,13 +61,159 @@ public:
 
 下面派生类的虚拟函数的重新声明哪些是错误的？
 
+
+(a)
+
+```c++
+Base* Base::copy( Base* );
+Base* Derived::copy( Derived* );
 ```
-(a) Base* Base::copy( Base* );
-    Base* Derived::copy( Derived* );
-(b) Base* Base::copy( Base* );
-    Derived* Derived::copy( Base* );
-(c) ostream& Base::print( int, ostream&=cout );
-    ostream& Derived::print( int, ostream& );
-(d) void Base::eval() const;
-    void Derived::eval();
+
+(b)
+
+```c++
+Base* Base::copy( Base* );
+Derived* Derived::copy( Base* );
 ```
+
+(c)
+
+```c++
+ostream& Base::print( int, ostream&=cout );
+ostream& Derived::print( int, ostream& );
+```
+
+(d)
+
+```c++
+void Base::eval() const;
+void Derived::eval();
+```
+
+---
+
+## 练习 18.1
+
+下列声明哪些是错误的？请说明原因。
+
+(a)
+```c++
+class CADVehicle: public CAD, Vehicle { /* ... */ };
+```
+
+(b)
+```c++
+class DoublyLinkedList: public List, public List { /* ... */ };
+```
+
+(c)
+```c++
+class iostream: private istream, private ostream { /* ... */ };
+```
+
+---
+
+## 练习 18.2
+
+已知下列类层次结构，它们都定义了默认的构造函数：
+
+```c++
+class A { ... };
+class B: public A { ... };
+class C: public B { ... };
+class X { ... };
+class Y { ... };
+class Z: public X, public Y { ... };
+class MI: public C, public Z { ... };
+```
+
+定义的构造函数：`MI mi;` 的执行顺序是什么？
+
+---
+
+## 练习 18.3
+
+已知下列类层次结构，它们都定义了默认的构造函数：
+
+```c++
+class X { ... };
+class A { ... };
+class B : public A { ... };
+class C : private B { ... };
+class D : public X, public C { ... };
+D *pd = new D;
+```
+
+下列哪些转换是不允许的？
+
+(a): `X *px = pd;`
+
+(b): `A *pa = pd;`
+
+(c): `B *pb = pd;`
+
+(d): `C *pc = pd;`
+
+---
+
+## 练习 18.4
+
+已知下列类层次结构，以及虚拟函数集：
+
+```c++
+class Base {
+public:
+    virtual ~Base();
+    virtual ostream&print();
+    virtual void log();
+    virtual void debug();
+    virtual void readOn();
+    virtual void writeOn();
+    // ...
+};
+class Derived1 : virtual public Base {
+public:
+    virtual ~Derived1();
+    virtual void writeOn();
+    // ...
+};
+class Derived2 : virtual public Base {
+public:
+    virtual ~Derived2();
+    virtual void readOn();
+    // ...
+};
+class MI : public Derived1, public Derived2 {
+public:
+    virtual ~MI();
+    virtual ostream&print();
+    virtual void debug();
+    // ...
+};
+
+Base *pb = new MI;
+```
+
+下列语句调用哪一个函数实例？
+
+(a): `pb->print();`
+
+(b): `pb->debug();`
+
+(c): `pb->readOn();`
+
+(d): `pb->writeOn();`
+
+(e): `pb->log();`
+
+(f): `delete pb;`
+
+---
+
+## 练习 18.5
+
+使用练习 18.4 定义的类层次结构，请指出当通过 (a) pd1 和 (b) d2 调用时，哪些虚拟函数是活动的：
+
+(a): `Derived1 *pd1 = new MI;`
+
+(b): `MI obj; Derived2 d2 = obj;`
